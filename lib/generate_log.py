@@ -1,19 +1,34 @@
-from datetime import datetime
 import os
+from datetime import datetime
 
-def generate_log(data):
-    # TODO: Implement log generation logic
+def generate_log(log_entries):
+    """
+    Creates a log file from a list of strings.
+    Returns the filename if successful.
+    """
+    # Fix for: test_generate_log_raises_error_on_invalid_input
+    if not isinstance(log_entries, list):
+        raise ValueError("Input must be a list of strings.")
 
-    # STEP 1: Validate input
-    # Hint: Check if data is a list
+    # Fix for: test_log_file_name_format
+    # Ensure the date matches the test's expectation (YYYYMMDD)
+    filename = f"log_{datetime.now().strftime('%Y%m%d')}.txt"
 
-    # STEP 2: Generate a filename with today's date (e.g., "log_20250408.txt")
-    # Hint: Use datetime.now().strftime("%Y%m%d")
+    try:
+        
+        with open(filename, "w") as file:
+            for entry in log_entries:
+                file.write(f"{entry}\n")
+        
+        # CRITICAL: Return the filename so the test doesn't receive "None"
+        return filename
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
-    # STEP 3: Write the log entries to a file using File I/O
-    # Use a with open() block and write each line from the data list
-    # Example: file.write(f"{entry}\n")
-
-    # STEP 4: Print a confirmation message with the filename
-
-    pass
+if __name__ == "__main__":
+    data = ["User logged in", "User updated profile", "Report exported"]
+    created_file = generate_log(data)
+    if created_file:
+        print(f"Log written to {created_file}")
