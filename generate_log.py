@@ -1,49 +1,34 @@
-import requests
-import pandas as pd
+import os
 from datetime import datetime
-from rich.console import Console
 
-# Initialize rich console for fancy terminal output
-console = Console()
+def generate_log(log_entries):
+    """
+    Creates a log file from a list of strings.
+    Returns the filename if successful.
+    """
+    # Fix for: test_generate_log_raises_error_on_invalid_input
+    if not isinstance(log_entries, list):
+        raise ValueError("Input must be a list of strings.")
 
-def fetch_post_data(post_id=1):
-    """Fetches a post from a placeholder API."""
-    url = f"https://jsonplaceholder.typicode.com/posts/{post_id}"
+    # Fix for: test_log_file_name_format
+    # Ensure the date matches the test's expectation (YYYYMMDD)
+    filename = f"log_{datetime.now().strftime('%Y%m%d')}.txt"
+
     try:
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        console.print(f"[bold red]Error fetching data:[/bold red] {e}")
+        # Fix for: test_log_file_created / test_empty_log_list_creates_empty_file
+        with open(filename, "w") as file:
+            for entry in log_entries:
+                file.write(f"{entry}\n")
+        
+        # CRITICAL: Return the filename so the test doesn't receive "None"
+        return filename
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
         return None
 
-def save_to_csv(data):
-    """Saves dictionary data to a timestamped CSV file."""
-    if not data:
-        return
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"api_data_{timestamp}.csv"
-    
-    # Convert dict to DataFrame and export
-    df = pd.DataFrame([data])
-    df.to_csv(filename, index=False)
-    return filename
-
-def main():
-    console.print("[bold cyan]Starting automation script...[/bold cyan]")
-    
-    # 1. Fetch Data
-    post = fetch_post_data()
-    
-    if post:
-        console.print(f"Fetched Post: [green]{post.get('title')}[/green]")
-        
-        # 2. Save Data
-        filename = save_to_csv(post)
-        console.print(f"[bold white]Success![/bold white] Data saved to [underline]{filename}[/underline]")
-    else:
-        console.print("[yellow]No data was saved due to a fetch error.[/yellow]")
-
 if __name__ == "__main__":
-    main()
+    data = ["User logged in", "User updated profile", "Report exported"]
+    created_file = generate_log(data)
+    if created_file:
+        print(f"Log written to {created_file}")
